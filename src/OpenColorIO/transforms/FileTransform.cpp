@@ -153,6 +153,54 @@ const char * FileTransform::GetFormatNameByIndex(int index)
     return FormatRegistry::GetInstance().getFormatNameByIndex(FORMAT_CAPABILITY_READ, index);
 }
 
+
+// Added Feature: Helper function to check if an extension is supported by FileTransform
+// Returns true if the extension corresponds to a format supported by FileTransform.
+// The argument is case-insensitive, and a leading dot, if present, is ignored.
+static bool IsFormatExtensionSupported(const char* ext)
+{
+    // Ensures that extension pointer isn't null
+    if (ext == nullptr) {
+        return false;
+    }
+
+    // Converts const char* to string to evaluate easier
+    std::string extStr = ext;
+
+    // Ensures extStr is not an empty string
+    if (extStr.empty()) {
+        return false;
+    }
+
+    // Removes leading dot, if present (ex. ".TIFF" -> "TIFF")
+    if (extStr[0] == '.') {
+        extStr.erase(0, 1);
+    }
+
+    // Makes the extension lowercase for case-insensitive comparison
+    for (int i = 0; i < extStr.size(); i++) {
+        extStr[i] = std::tolower(static_cast<unsigned char>(extStr[i]));
+    }
+
+    // Uses GetNumFormats function to iterate through all supported formats to determine if the inputted extension is supported
+    for (int i = 0; i < GetNumFormats(); i++) {
+        // The supported extension for this iteration
+        std::string supportedExt = GetFormatExtensionByIndex(i);
+
+        // Makes the supported extension lowercase for case-insensitive comparison
+        for (int j = 0; j < supportedExt.size(); j++) {
+            supportedExt[j] = std::tolower(static_cast<unsigned char>(supportedExt[j]));
+        }
+
+        // If extStr is one of the supported extensions, return true
+        if (extStr == supportedExt) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const char * FileTransform::GetFormatExtensionByIndex(int index)
 {
     return FormatRegistry::GetInstance().getFormatExtensionByIndex(FORMAT_CAPABILITY_READ, index);
